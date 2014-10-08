@@ -1,0 +1,31 @@
+#!/bin/bash
+
+DIR="/tmp/hadoop-$USER"
+
+# Remoção dos eventuais arquivos temporários locais criados em execuções anteriores
+rm -Rf $DIR/*
+# Formatação do namenode
+bin/hdfs namenode -format
+# Inicialização do namenode e do(s) datanode(s)
+sbin/start-dfs.sh
+sbin/start-yarn.sh
+# Criação dos diretórios
+bin/hdfs dfs -mkdir /user
+bin/hdfs dfs -mkdir /user/$USER
+# Realização da cópia do input local para o HDFS
+bin/hdfs dfs -put matrix input
+# Compilação do código java
+bin/hadoop com.sun.tools.javac.Main BlockMatrixMultiplication.java
+jar cf bl.jar BlockMatrixMultiplication*.class
+# Execução da primeira etapa
+bin/hadoop jar bl.jar BlockMatrixMultiplication input output
+# Exibicão do resultado na tela
+bin/hdfs dfs -cat output/*
+# Removendo arquivos no HDFS
+bin/hdfs dfs -rm -r -f output
+bin/hdfs dfs -rm -r -f input
+# Stop
+sbin/stop-dfs.sh
+sbin/stop-yarn.sh
+# Remoção dos arquivos temporários locais criados pela execução
+rm -Rf $DIR/*

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+DIR="/tmp/hadoop-$USER"
+
+# Stop
+sbin/stop-dfs.sh
+sbin/stop-yarn.sh
+# Remoção dos arquivos temporários locais criados pela execução
+rm -Rf $DIR/*
